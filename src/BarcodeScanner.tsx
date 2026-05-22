@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
-import useBarcodeScanner2 from './useBarcodeScanner2'
+import Barcode from './Barcode'
 
 const MIN_LENGTH = 3
 const FLASH_MS = 350
@@ -105,7 +105,6 @@ const ScansList = ({ flash, scans, onClear }: ScansListProps) => (
 )
 
 const BarcodeScanner = () => {
-  const inputRef = useRef<HTMLInputElement>(null)
   const flashTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [ scans, setScans ] = useState<ScanRecord[]>([])
   const [ flash, setFlash ] = useState(false)
@@ -130,38 +129,11 @@ const BarcodeScanner = () => {
     return isValid
   }, [])
 
-  useBarcodeScanner2({
-    autoFocus: true,
-    enabled  : true,
-    inputRef,
-    minLength: MIN_LENGTH,
-    onScan   : handleScan,
-    onValid  : handleValid
-  })
-
-  const clearScans = () => {
-    setScans([])
-    inputRef.current?.focus({ preventScroll: true })
-  }
-
   return (
     <div className="px-4 pb-10 max-w-3xl mx-auto flex flex-col gap-6">
-      {/* Input invisible — necesario para el hook, pero sin presencia visual.
-          pointer-events:none → el usuario no puede tocarlo → sin gesto → sin teclado.
-          opacity-0 + 1px → invisible. top/left 0 → dentro del viewport (requerido por IME). */}
-      <input
-        ref={inputRef}
-        type="text"
-        autoComplete="off"
-        autoCorrect="off"
-        autoCapitalize="off"
-        spellCheck={false}
-        aria-hidden="true"
-        tabIndex={-1}
-        className="fixed top-0 left-0 w-px h-px opacity-0 pointer-events-none"
-      />
+      <Barcode minLength={MIN_LENGTH} onScan={handleScan} onValid={handleValid} />
 
-      <ScansList flash={flash} scans={scans} onClear={clearScans} />
+      <ScansList flash={flash} scans={scans} onClear={() => setScans([])} />
     </div>
   )
 }
